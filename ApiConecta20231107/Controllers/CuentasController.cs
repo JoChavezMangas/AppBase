@@ -194,8 +194,11 @@ namespace API.Controllers
 
             var claims = new List<Claim>()
             {
+                new Claim(ClaimTypes.Role,Roles.First()),
+                new Claim(ClaimTypes.NameIdentifier,usuario.Id),
+                new Claim("Id",usuario.Id),
                 new Claim("email",credencialesUsuario.Email),
-                new Claim(ClaimTypes.Role,Roles.First())
+                new Claim("Role",Roles.First())
             };
 
             var keyPlease = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]));

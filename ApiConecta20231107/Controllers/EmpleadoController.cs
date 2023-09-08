@@ -16,6 +16,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Entity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using ApiConecta20231107.Auxiliares;
 
 namespace API.Controllers
 {
@@ -33,23 +34,7 @@ namespace API.Controllers
         private readonly IMetodosAUX _metodosAUX;
         private readonly IMapper mapper;
         private readonly IHistorialEmpleadoServicio _historialEmpleadoServicio;
-
-        //private readonly ApiConectaContext _context;
-        //
-        //private readonly IPuestoServicio _puestoServicio;
-        //private readonly IAreaServicio _areaServicio;
-        //private readonly IEmpresaServicio _empresaServicio;
-        //private readonly IEstructuraEmpleadoLiderServicio _estructuraEmpleadoLiderServicio;
-        //private readonly IEmpleadoDireccionServicio _empleadoDireccionServicio;
-        //private readonly ITipoContratacionServicio _tipoContratacionServicio;
-        //private readonly IDatoBancariosServicio _datoBancariosServicio;
-        //private readonly IEmpleadoDatosNominaServicio _empleadoDatosNominaServicio;
-        //private readonly IEmpleadoContactoEmergeciaServicio _empleadoContactoEmergeciaServicio;
-        //private readonly ICatalogAUX _catalogAUX;
-
-
-        //private readonly IEmpleadoDiasSolicitudesServicio _empleadoDiasSolicitudesServicio;
-
+        private readonly IContextoPeticion _contexto;
 
         public EmpleadoController(  ApiConectaContext context, 
                                     IMapper mapper, 
@@ -60,7 +45,8 @@ namespace API.Controllers
                                     ICatalogAUX catalogAUX,
                                     IMetodosAUX metodosAUX,
                                     IConfiguration configuration,
-                                    IHttpContextAccessor httpContextAccessor)
+                                    IHttpContextAccessor httpContextAccessor,
+                                    IContextoPeticion contexto)
         {
             this.roleManager = roleManager;
             this._userManager = userManager;
@@ -70,20 +56,7 @@ namespace API.Controllers
             this._metodosAUX = metodosAUX;
             this.mapper = mapper;
             this._historialEmpleadoServicio = historialEmpleadoServicio;
-
-            //this._context = context;
-            //this._puestoServicio = puestoServicio;
-            //
-            //this._empresaServicio = empresaServicio;
-            //this._areaServicio = areaServicio;
-            //this._estructuraEmpleadoLiderServicio = estructuraEmpleadoLiderServicio;
-            //this._empleadoDireccionServicio = empleadoDireccionServicio;
-            //this._tipoContratacionServicio = tipoContratacionServicio;
-            //this._datoBancariosServicio = datoBancariosServicio;
-            //this._empleadoDatosNominaServicio = empleadoDatosNominaServicio;
-            //this._empleadoContactoEmergeciaServicio = empleadoContactoEmergeciaServicio;
-            //this._catalogAUX = catalogAUX;
-            //this._empleadoDiasSolicitudesServicio = empleadoDiasSolicitudesServicio;
+            this._contexto = contexto;
         }
 
 
@@ -207,6 +180,8 @@ namespace API.Controllers
         {
             try
             {
+
+                var empresaActual = _httpContextAccessor.HttpContext.User.Claims;
 
                 EmpleadoDTO result = await ListaEmpleadosCompleto(Id);
 
