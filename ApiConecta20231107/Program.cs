@@ -23,7 +23,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddValidatorsFromAssemblyContaining<EmpresaValidador>();
 
 
-var keyPlease = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("My loneliness is killing me (and I), I must confess I still believe (still believe), When I'm not with you I lose my mind,Give me a sign, Hit me baby one more time"));
+var keyPlease = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["llavejwt"]));
 
 
 
