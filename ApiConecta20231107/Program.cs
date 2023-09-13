@@ -1,6 +1,7 @@
 using API.Auxiliares;
 using API.Servicios;
 using API.Validador;
+using ApiConecta20231107.Auxiliares;
 using Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -104,10 +105,12 @@ builder.Services.AddDbContext<ApiConectaContext>(options =>
 //SERVICIOS
 builder.Services.AddScoped<IEmpleadosServicio, EmpleadosServicio>();
 builder.Services.AddScoped<IHistorialEmpleadoServicio, HistorialEmpleadoServicio>();
+builder.Services.AddScoped<ILogApiServicio, LogApiServicio>();
 
 //AUXILIARES
 builder.Services.AddScoped<ICatalogAUX, CatalogAUX>();
 builder.Services.AddScoped<IMetodosAUX, MetodosAUX>();
+builder.Services.AddScoped<IContextoPeticion, ContextoPeticion>();
 #endregion
 
 
@@ -120,6 +123,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler("/api/Cuentas/error");
 
 app.UseHttpsRedirection();
 

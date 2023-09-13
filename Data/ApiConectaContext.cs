@@ -42,6 +42,7 @@ namespace Data
         #region Mapeo de Entidades
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<HistorialEmpleado> HistorialEmpleado { get; set; }
+        public DbSet<LogApi> LogApi { get; set; }
         #endregion
 
 

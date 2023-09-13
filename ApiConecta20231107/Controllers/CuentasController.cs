@@ -2,9 +2,11 @@
 using API.DTOs;
 using API.DTOs.OtrosSistemas;
 using API.Servicios;
+using Entidades;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,14 +28,15 @@ namespace API.Controllers
         private readonly HashService hashService;
         private readonly IDataProtector dataProtector;
         private readonly IMetodosAUX _metodosAUX;
-        //private readonly IEmpleadosServicio _empleadosServicio;
+        private readonly ILogApiServicio _logApiServicio;
 
         public CuentasController(UserManager<IdentityUser> userManager, 
                                  IConfiguration configuration, 
                                  SignInManager<IdentityUser> signInManager, 
                                  IDataProtectionProvider dataProtectionProvider,
                                  HashService hashService,
-                                 IMetodosAUX metodosAUX)
+                                 IMetodosAUX metodosAUX,
+                                 ILogApiServicio logApiServicio)
                                  //IEmpleadosServicio empleadosServicio)
         {
             this.userManager = userManager;
@@ -42,7 +45,7 @@ namespace API.Controllers
             this.hashService = hashService;
             dataProtector = dataProtectionProvider.CreateProtector("CA3MWMYAJdaW4TH61Th95kuVMSU51n9iA");
             this._metodosAUX = metodosAUX;
-            //this._empleadosServicio = empleadosServicio;
+            this._logApiServicio = logApiServicio;
         }
 
 
@@ -312,7 +315,35 @@ namespace API.Controllers
             }
         }
 
+        [Route("error")]
+        public IActionResult HandleErrorDevelopment([FromServices] IHostEnvironment hostEnvironment)
+        {
+            var exceptionHandlerFeature =
+                HttpContext.Features.Get<IExceptionHandlerFeature>()!;
 
+            LogApi log = new LogApi()
+            {
+                status = Constantes.RESPUESTA_ERROR,
+                urlEnpoint = exceptionHandlerFeature.Path,
+                Message = exceptionHandlerFeature.Error.Message,
+                json = string.Empty,
+            };
+
+
+            var curentUser = HttpContext.User.Claims.FirstOrDefault(z => z.Type == "empleadoId")?.Value;
+
+            _logApiServicio.Crear(log, curentUser);
+
+            if (!hostEnvironment.IsDevelopment())
+            {
+                return NotFound();
+            }
+
+
+            return Problem(
+                detail: exceptionHandlerFeature.Error.StackTrace,
+                title: exceptionHandlerFeature.Error.Message);
+        }
 
 
     }
