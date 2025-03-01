@@ -1,6 +1,6 @@
 ﻿using API.Auxiliares;
 using API.DTOs;
-using API.DTOs.OtrosSistemas;
+//using API.DTOs.OtrosSistemas;
 using AutoMapper;
 using Data;
 using Entidades;
@@ -77,7 +77,11 @@ namespace API.Controllers
 
                 var empresaActual = _httpContextAccessor.HttpContext.User.Claims;
 
-                EmpleadoDTO result = await ListaEmpleadosCompleto(Id);
+                EmpleadoDTO result = new EmpleadoDTO()
+                {
+                    Nombre ="Silvia",
+                    ApellidoPaterno= "Ramirez"
+                };
 
                 var user = _userManager.Users.Where(z => z.Id == result.Id.ToString());
                 if (user.Any())
@@ -113,148 +117,6 @@ namespace API.Controllers
 
 
 
-
-        /// <summary>
-        /// Busqueda general de empleados, obtiene Empleados con puestos areas y empresas
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IQueryable<EmpleadoDTO>> ListaEmpleados()
-        {
-            var consulta = from empleados in _empleadosServicio.ObtenerConsulta()
-                           //join puesto in _context.Puestos.AsQueryable()
-                           //on empleados.PuestoId equals puesto.Id
-                           //join areas in _context.Areas.AsQueryable()
-                           //on puesto.AreaId equals areas.Id
-                           //join empresa in _context.Empresas.AsQueryable()
-                           //on areas.EmpresaId equals empresa.Id
-
-                           select new EmpleadoDTO
-                           {
-                               Id = empleados.Id,
-                               Nombre = empleados.Nombre,
-                               SegundoNombre = empleados.SegundoNombre,
-                               ApellidoPaterno = empleados.ApellidoPaterno,
-                               ApellidoMaterno = empleados.ApellidoMaterno,
-                               NombreCompleto = empleados.Nombre + " " +
-                                                empleados.SegundoNombre + " " +
-                                                empleados.ApellidoPaterno + " " +
-                                                empleados.ApellidoMaterno,
-                               NombreEmpresa = "Nombre de la empresa",
-                               NombreArea = "Nombre del area",
-                               NombrePuesto = "Nombre del puesto",
-                               CorreoEmpresarial = empleados.CorreoEmpresarial,
-                               CorreoPersonal = empleados.CorreoPersonal,
-                               CURP = empleados.CURP,
-                               RFC = empleados.RFC,
-                               FechaNacimiento = empleados.FechaNacimiento,
-                               Sexo = empleados.Sexo,
-                               AreaId = 0,
-                               EmpresaId = 0,
-                               PuestoId = 0,
-                               SueldoDiario = empleados.SueldoDiario,
-                               SueldoDiarioIntegrado = empleados.SueldoDiarioIntegrado,
-                           };
-
-
-            return consulta;
-        }
-
-
-        /// <summary>
-        /// Busqueda general de empleados con toda la informacion
-        /// </summary>
-        /// <returns></returns>
-        public async Task<EmpleadoDTO> ListaEmpleadosCompleto(int empleadoId)
-        {
-            #region consulta anterior
-            var consulta = from empleados in _empleadosServicio.ObtenerConsulta() //_context.Empleados.AsQueryable()
-                          
-
-                           where empleados.Id == empleadoId
-
-                           select new EmpleadoDTO
-                           {
-                               Id = empleados.Id,
-                               Nombre = empleados.Nombre,
-                               SegundoNombre = empleados.SegundoNombre,
-                               ApellidoPaterno = empleados.ApellidoPaterno,
-                               ApellidoMaterno = empleados.ApellidoMaterno,
-                               NombreCompleto = empleados.Nombre + " " +
-                                                empleados.SegundoNombre + " " +
-                                                empleados.ApellidoPaterno + " " +
-                                                empleados.ApellidoMaterno,
-                               NombreEmpresa = "",
-                               NombreArea = "",
-                               NombrePuesto = "",
-                               CorreoEmpresarial = empleados.CorreoEmpresarial,
-                               CorreoPersonal = empleados.CorreoPersonal,
-                               CURP = empleados.CURP,
-                               RFC = empleados.RFC,
-                               FechaNacimiento = empleados.FechaNacimiento,
-                               Sexo = empleados.Sexo,
-                               AreaId = 0,
-                               EmpresaId = 0,
-                               PuestoId = 0,
-                               SueldoDiario = empleados.SueldoDiario,
-                               SueldoDiarioIntegrado = empleados.SueldoDiarioIntegrado,
-                               idUser = empleados.IdExterno,
-
-
-                               //Tipo Contratacion
-                               nss = "",
-                               telefono = "",
-                               fechaIngreso = DateTime.Now,
-                               fechaTerminacionPrueba = DateTime.Now,
-                               modalidad = "",
-
-                               //Direccion
-                               pais = "",
-                               estado = "",
-                               municipio = "",
-                               colonia = "",
-                               calle = "",
-                               codigoPostal = "",
-                               telefonoFijo = "",
-
-
-                               //Datos bancarios
-                               NoCuenta = "",
-                               clabe = "",
-                               bancoId = 0,
-                               bancoExterno = Guid.Empty,
-                               numeroTarjeta = "",
-
-
-
-                               //Nomina
-                               //SueldoDiario = x3 == null ? 0 : x3.sueldoDiario,
-                               //SueldoDiarioIntegrado = x3 == null ? 0 : x3.sueldoDiarioIntegrado,
-                               BonoTrimestral = 0,
-                               fechaSueldo = DateTime.Now,
-                               tipoContrato = "",
-                               duracionContrato = "",
-                               finContrato = null,
-                               tipoRegimen = string.Empty,
-                               razonSocial = string.Empty,
-                               esquemaOutsourcing = false,
-
-
-                               //EmpleadoContactoEmergecia
-                               nombreContacto = string.Empty,
-                               parentesco = string.Empty,
-                               celularContacto = string.Empty,
-                               telefonoContacto = string.Empty,
-                               correoContacto = string.Empty,
-
-                               //Lider directo
-                               liderDirecto = 0
-                           };
-            #endregion
-
-            var obj = consulta.FirstOrDefault();
-
-            return obj;
-        }
 
 
         /// <summary>

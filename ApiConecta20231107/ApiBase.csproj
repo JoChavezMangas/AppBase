@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DTOs\OtrosSistemas\**" />
+    <Content Remove="DTOs\OtrosSistemas\**" />
+    <EmbeddedResource Remove="DTOs\OtrosSistemas\**" />
+    <None Remove="DTOs\OtrosSistemas\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="DTOs\AgenteSOCDTO.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />

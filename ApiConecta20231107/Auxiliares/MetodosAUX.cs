@@ -1,6 +1,4 @@
 ﻿using API.DTOs;
-using API.DTOs.OtrosSistemas;
-using ApiBase.DTOs.OtrosSistemas;
 using Data;
 using Entidades;
 using IdentityModel.Client;
@@ -146,77 +144,8 @@ namespace API.Auxiliares
         }
 
 
-        public async Task<GeneralDTO> ObtenerOtroSistema(string id,string url,string sistema)
-        {
-            GeneralDTO result = new GeneralDTO();
-            string tockenExterno = GetTokenExternos();
-            HttpClient apiClient = new HttpClient();
-            apiClient.SetBearerToken(tockenExterno);
-            var requestData = new { Id = id };
-            var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
-            url = url + "?Id=" + id;
-            HttpResponseMessage respons;
-            respons = apiClient.PostAsync(url, content).Result;
-            if (respons.IsSuccessStatusCode)
-            {
-                var jsonResponse = respons.Content.ReadAsStringAsync().Result;
-                result = MapRespuestaOtroSistema(jsonResponse, sistema);
-
-            }
-            else
-            {
-                var jsonResponseError = respons.Content.ReadAsStringAsync().Result;
-                              
-            }
-
-            return result;
-
-        }
 
       
-
-
-        /// <summary>
-        /// Metodo para mandar empleado a otro sistema, usa metodo post y put
-        /// </summary>
-        /// <param name="generalDTO"></param>
-        /// <param name="url"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public string MandarOtroSistema(GeneralDTO generalDTO,string url,string type = "post")
-        {
-            string tockenExterno = GetTokenExternos();
-            string result = string.Empty;
-            HttpClient apiClient = new HttpClient();
-            apiClient.SetBearerToken(tockenExterno);
-            //apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tockenExterno);
-            var webApiUrl = url;
-            string inputJson = JsonConvert.SerializeObject(generalDTO);
-            HttpContent inputContent = new StringContent(inputJson, Encoding.UTF8, "application/json");
-
-            HttpResponseMessage respons;
-
-            if(type=="post")
-                respons = apiClient.PostAsync(webApiUrl, inputContent).Result;
-            else
-                respons = apiClient.PutAsync(webApiUrl, inputContent).Result;
-
-            if (respons.IsSuccessStatusCode)
-            {
-                var jsonResponse = respons.Content.ReadAsStringAsync().Result;
-                result = Constantes.RESPUESTA_OK;
-            }
-            else
-            {
-                var jsonResponseError = respons.Content.ReadAsStringAsync().Result;
-
-            }
-
-            return result;
-        }
-
-
-
 
 
 
@@ -388,43 +317,6 @@ namespace API.Auxiliares
 
 
 
-        public GeneralDTO MapRespuestaOtroSistema(string Json, string sistema)
-        {
-            GeneralDTO result = new GeneralDTO();
-
-            if (string.IsNullOrEmpty(Json))
-                return result;
-
-            switch (sistema)
-            {
-                case Constantes.OTRO_SISTEMA_SISEC:
-                    result = JsonConvert.DeserializeObject<SisecDTO>(Json);
-                    break;
-                case Constantes.OTRO_SISTEMA_AGENTESOC:
-                    result = JsonConvert.DeserializeObject<AgenteSOCDTO>(Json);
-                    break;
-                case Constantes.OTRO_SISTEMA_BROKERMASTER:
-                    result = JsonConvert.DeserializeObject<BrokersMasterDTO>(Json);
-                    break;
-                case Constantes.OTRO_SISTEMA_CAPTURA:
-                    result = JsonConvert.DeserializeObject<CapturaDTO>(Json);
-                    break;
-                case Constantes.OTRO_SISTEMA_CREDIHIPO:
-                    result = JsonConvert.DeserializeObject<CrediHipotecarioDTO>(Json);
-                    break;
-                case Constantes.OTRO_SISTEMA_RESUELVEME:
-                    result = JsonConvert.DeserializeObject<ResuelvemeDTO>(Json);
-                    break;
-                case Constantes.OTRO_SISTEMA_SICAFI:
-                    result = JsonConvert.DeserializeObject<SicafiDTO>(Json);
-                    break;
-                case Constantes.OTRO_SISTEMA_VALIDOC:
-                    result = JsonConvert.DeserializeObject<ValidocDTO>(Json);
-                    break;
-
-            }
-            return result;
-        }
 
         public string ObtenerBotonSistema(string sistema)
         {

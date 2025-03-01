@@ -19,7 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(Program));
-
 builder.Services.AddValidatorsFromAssemblyContaining<EmpresaValidador>();
 
 
@@ -35,28 +34,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = keyPlease,        // new SymmetricSecurityKey(
-                                    //Encoding.UTF8.GetBytes(builder.Configuration["llavejwt"])),
+                                             //Encoding.UTF8.GetBytes(builder.Configuration["llavejwt"])),
         ClockSkew = TimeSpan.Zero
 
     });
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApiConectaContext>().AddDefaultTokenProviders();
 
-builder.Services.AddAuthorization(opciones =>
-{
-    opciones.AddPolicy("EsAdmin", politica => politica.RequireClaim("esAdmin"));
-    opciones.AddPolicy("EsInterno", politica => politica.RequireClaim("esInterno"));
-
-});
-
-//builder.Services.AddDataProtection();
 builder.Services.AddTransient<HashService>();
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 
 builder.Services.AddCors(opciones =>
 {
-    opciones.AddDefaultPolicy(policy=> policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+    opciones.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 });
 
 builder.Services.AddHttpContextAccessor();
