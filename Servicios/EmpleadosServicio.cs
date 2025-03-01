@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.DataProtection;
-//2023-08-15
 namespace Servicios
 {
     public class EmpleadosServicio : ServiciosBase<Empleado>, IEmpleadosServicio

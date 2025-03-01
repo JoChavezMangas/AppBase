@@ -31,13 +31,6 @@ namespace API.Auxiliares
             this.configuration = configuration;
         }
 
-
-
-        
-
-
-
-
         public List<string[]> HistorialGenerico(string tabla, string filtroTabla, string filtroEmpleado)
         {
 
@@ -56,244 +49,6 @@ namespace API.Auxiliares
             return query.ToList();
         }
 
-
-
-
-        public string UploadFiles(List<IFormFile> files, int solicitudId, string _contexEmpleadoId)
-        {
-            // Iterar a través de los archivos y guardarlos en el servidor
-
-            foreach (var file in files)
-            {
-                // Guardar el archivo en el directorio deseado
-
-                if (file.Length > 0)
-                {
-                    var filePath = Path.GetTempFileName();
-                    var filebase64 = ConvertFileToBase64(file);
-                    Guid Id = Guid.NewGuid();
-                    DocumentoDTO documento = new DocumentoDTO()
-                    {
-                        NameFile = DateTime.Now.ToString("yyyymmddhhmmss_") + file.FileName,
-                        DocumentBase64 = filebase64,
-                        Id = Id,
-                        systemName = "Conecta",
-                        DocumentType = "Conecta",
-                        UserId = Guid.NewGuid(),
-                        IdentificationId = Guid.NewGuid(),
-                        Folio = "1",
-                        Status = 1,
-                        Origin = "Conecta"
-                    };
-
-                    Guid idExterno = SendDocumentFileServer(documento);
-
-                    //DocumentosSolicitudes doc = new DocumentosSolicitudes()
-                    //{
-                    //    NameFile = DateTime.Now.ToString("yyyymmddhhmmss_") + file.FileName,
-                    //    PathFile = filePath,
-                    //    SolicitudId = solicitudId,
-                    //    idExterno = idExterno,
-
-                    //};
-
-                    //_documentosSolicitudesServicio.Crear(doc, _contexEmpleadoId);
-
-                }
-            }
-
-            // Devolver una respuesta adecuada según tus necesidades
-
-            return Constantes.RESPUESTA_OK;
-        }
-
-        public static string ConvertFileToBase64(IFormFile file)
-        {
-            using (var ms = new MemoryStream())
-            {
-                file.CopyTo(ms);
-                var fileBytes = ms.ToArray();
-                string s = Convert.ToBase64String(fileBytes);
-                // act on the Base64 data
-                return s;
-            }
-        }
-
-        /// <summary>
-        /// Metodo para mandar documento servidor de documentos
-        /// </summary>
-        /// <param name="docModel"></param>
-        /// <returns></returns>
-        public Guid SendDocumentFileServer(DocumentoDTO docModel)
-        {
-            Guid result = Guid.Empty;
-
-            var webApiUrl = configuration["API_DOCUMENT_createDocument"];//  "http://apidocumentv3.sisec.mx/api/document/createDocument";
-            string inputJson = JsonConvert.SerializeObject(docModel);
-            HttpContent inputContent = new StringContent(inputJson, Encoding.UTF8, "application/json");
-
-            HttpClient client = new HttpClient();
-            HttpResponseMessage respons = client.PostAsync(webApiUrl, inputContent).Result;
-            var result1 = respons.Content.ReadAsStringAsync().Result;
-            if (respons.StatusCode == HttpStatusCode.OK)
-            {
-                result= JsonConvert.DeserializeObject<DocumentoDTO>(result1).documentId;
-            };
-
-            return result;
-        }
-
-
-
-      
-
-
-
-        public ResponseWebApiMulti PostWebAPiUsersMultiLogin<T>(T entity, string url)
-        {
-            return PostWebAPiUsersMultiLoginRESULT(entity, url).Result;
-        }
-
-
-        public  async Task<ResponseWebApiMulti> PostWebAPiUsersMultiLoginRESULT<T>(T entity, string url)
-        {
-            var response = new ResponseWebApiMulti();
-            var result = string.Empty;
-            var json = string.Empty;
-            HttpResponseMessage responseApi = new HttpResponseMessage();
-            try
-            {
-                //var clientId = "soc_identityapi_conecta";
-                //var clientSecret = "5ce8d353-e9a9-4cbf-72de-1d253128873e";
-                //var scope = "IdentityServerApi";
-                var clientId = configuration["API_MULTILOGIN_identityapi"];
-                var clientSecret = configuration["API_MULTILOGIN_clientSecret"];
-                var scope = configuration["API_MULTILOGIN_scope"];
-
-                var token = GetTokenMultilogin(clientId, clientSecret, scope);
-
-                var apiClient = new HttpClient();
-                apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                json = JsonConvert.SerializeObject(entity);
-                StringContent input = new StringContent(json, Encoding.UTF8, "application/json");
-                responseApi = await apiClient.PostAsync(url, input);
-
-                result = await responseApi.Content.ReadAsStringAsync();
-                response = JsonConvert.DeserializeObject<ResponseWebApiMulti>(result);
-            }
-            catch (Exception e)
-            {
-                string error = e.Message;
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        /// Metodo para obtener tocken de multilogin
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="clientSecret"></param>
-        /// <param name="clientScopes"></param>
-        /// <returns></returns>
-        public string GetTokenMultilogin(string clientId, string clientSecret, string clientScopes)
-        {
-            var token = string.Empty;
-            var client = new HttpClient();
-            //var authority = "https://pserverlogin.sisec.mx";
-            var authority = configuration["API_MULTILOGIN_login"];
-
-            var response = client.RequestTokenAsync(new TokenRequest
-            {
-                Address = $"{authority}/connect/token",
-                GrantType = IdentityModel.OidcConstants.GrantTypes.ClientCredentials,
-                ClientId = clientId,
-                ClientSecret = clientSecret,
-                Parameters =
-                {
-                    {"scope", clientScopes}
-                }
-
-            }).Result;
-            if (!response.IsError)
-                token = response.AccessToken;
-
-            return token;
-        }
-
-        /// <summary>
-        /// Metodo para obtener el tocken de autorizacion de apiexternos.sisec
-        /// </summary>
-        /// <returns></returns>
-        public string GetTokenExternos()
-        {
-            var token = string.Empty;
-            HttpClient apiClient = new HttpClient();
-            try
-            {
-                var ussPass = new { username = configuration["API_EXTERNO_uss"], password = configuration["API_EXTERNO_pass"] };
-                var inputJson = JsonConvert.SerializeObject(ussPass);
-                HttpContent inputContent = new StringContent(inputJson, Encoding.UTF8, "application/json");
-                HttpResponseMessage respons = apiClient.PostAsync(configuration["API_EXTERNO_token"], inputContent).Result;
-                if (respons.IsSuccessStatusCode)
-                {
-                    // Leer el contenido como cadena JSON
-                    string jsonResponse = respons.Content.ReadAsStringAsync().Result;
-
-                    // Deserializar el JSON para obtener el token
-                    var tokenObject = JsonConvert.DeserializeAnonymousType(jsonResponse, new { token = "" });
-                    token = tokenObject.token;
-                }
-            }
-            catch (Exception e)
-            {
-                string error = e.Message;
-            }
-
-            return token;
-        }
-
-
-        public string MandarCorreoNuevoUsuario(string nombre, string usuario, string correo, string sistemas)
-        {
-            string result = string.Empty;
-
-            //Obtiene correo
-            string body = ObtenerCorreohtml();
-            //Edita correo
-            body = body.Replace("[*NOMBREEMPLEADO*]", nombre);
-            body = body.Replace("[*USUARIO*]", usuario);
-            body = body.Replace("[*PASSWORD*]", "n3wPa$$w0rdT3st");
-            body = body.Replace("[*TEST*]", "*******************Correo enviado desde pruebas, por favor hacer caso omiso");
-
-            string botones = string.Empty;
-            if (sistemas.Contains(Constantes.OTRO_SISTEMA_SISEC))
-                botones = botones + ObtenerBotonSistema(Constantes.OTRO_SISTEMA_SISEC);
-            if (sistemas.Contains(Constantes.OTRO_SISTEMA_AGENTESOC))
-                botones = botones + ObtenerBotonSistema(Constantes.OTRO_SISTEMA_AGENTESOC);
-            if (sistemas.Contains(Constantes.OTRO_SISTEMA_BROKERMASTER))
-                botones = botones + ObtenerBotonSistema(Constantes.OTRO_SISTEMA_BROKERMASTER);
-            if (sistemas.Contains(Constantes.OTRO_SISTEMA_CAPTURA))
-                botones = botones + ObtenerBotonSistema(Constantes.OTRO_SISTEMA_CAPTURA);
-            if (sistemas.Contains(Constantes.OTRO_SISTEMA_CREDIHIPO))
-                botones = botones + ObtenerBotonSistema(Constantes.OTRO_SISTEMA_CREDIHIPO);
-            if (sistemas.Contains(Constantes.OTRO_SISTEMA_RESUELVEME))
-                botones = botones + ObtenerBotonSistema(Constantes.OTRO_SISTEMA_RESUELVEME);
-            if (sistemas.Contains(Constantes.OTRO_SISTEMA_SICAFI))
-                botones = botones + ObtenerBotonSistema(Constantes.OTRO_SISTEMA_SICAFI);
-            if (sistemas.Contains(Constantes.OTRO_SISTEMA_VALIDOC))
-                botones = botones + ObtenerBotonSistema(Constantes.OTRO_SISTEMA_VALIDOC);
-
-            body = body.Replace("[*BOTONES*]", botones);
-
-
-
-            MandarCorreo("Usuario Creado", correo , body);
-
-            return result;
-        }
-
         public string MandarCorreoPass(string usuario, string correo, string nuevoPass)
         {
             string result = string.Empty;
@@ -303,117 +58,23 @@ namespace API.Auxiliares
                 body = body.Replace("[*USUARIO*]", usuario);
                 body = body.Replace("[*PASSWORD*]", nuevoPass);
                 body = body.Replace("[*TEST*]", "*******************Correo enviado desde pruebas, por favor hacer caso omiso");
-                string botones = ObtenerBotonSistema(Constantes.OTRO_SISTEMA_CONECTA);
-                body = body.Replace("[*BOTONES*]", botones);
                 MandarCorreo("Contraseña actualizada", correo, body);
                 result = Constantes.RESPUESTA_OK;
             }
-            catch
+            catch (Exception e)
             {
-
+                var debug = e;
             }
-            return result;
-        }
-
-
-
-
-        public string ObtenerBotonSistema(string sistema)
-        {
-            string result = botonSistema;
-
-            try
-            {
-                switch (sistema) 
-                {
-                    case Constantes.OTRO_SISTEMA_SISEC:
-                        result = result.Replace("[*Sistema*]", "Sisec");
-                        result = result.Replace("[*LINK*]", configuration["URL_SISEC"]);
-                        break;
-                    case Constantes.OTRO_SISTEMA_AGENTESOC:
-                        result = result.Replace("[*Sistema*]", "Agente Soc");
-                        result = result.Replace("[*LINK*]", configuration["URL_AGENTESOC"]);
-                        break;
-                    case Constantes.OTRO_SISTEMA_BROKERMASTER:
-                        result = result.Replace("[*Sistema*]", "BrokersMaster");
-                        result = result.Replace("[*LINK*]", configuration["URL_BROKERMASTER"]);
-                        break;
-                    case Constantes.OTRO_SISTEMA_CAPTURA:
-                        result = result.Replace("[*Sistema*]", "Captura");
-                        result = result.Replace("[*LINK*]", configuration["URL_CAPTURA"]);
-                        break;
-                    case Constantes.OTRO_SISTEMA_CREDIHIPO:
-                        result = result.Replace("[*Sistema*]", "Credihipotecario");
-                        result = result.Replace("[*LINK*]", configuration["URL_CREDIPOTECARIO"]);
-                        break;
-                    case Constantes.OTRO_SISTEMA_RESUELVEME:
-                        result = result.Replace("[*Sistema*]", "Resuelveme");
-                        result = result.Replace("[*LINK*]", configuration["URL_RESUELVEME"]);
-                        break;
-                    case Constantes.OTRO_SISTEMA_SICAFI:
-                        result = result.Replace("[*Sistema*]", "Sicafi");
-                        result = result.Replace("[*LINK*]", configuration["URL_SICAFI"]);
-                        break;
-                    case Constantes.OTRO_SISTEMA_VALIDOC:
-                        result = result.Replace("[*Sistema*]", "Validoc");
-                        result = result.Replace("[*LINK*]", configuration["URL_VALIDOC"]);
-                        break;
-                    case Constantes.OTRO_SISTEMA_CONECTA:
-                        result = result.Replace("[*Sistema*]", "Conecta");
-                        result = result.Replace("[*LINK*]", configuration["URL_CONECTA"]);
-                        break;
-                }
-            }
-            catch { };
-
-            return result;
-        }
-
-        public string ObtenerCorreohtml()
-        {
-            string result = string.Empty;
-            string rutaCompleta = Path.GetFullPath("Documentos/UsuarioContrasenia.html");
-            try
-            {
-                string body = correo; //System.IO.File.ReadAllText(rutaCompleta);
-                result = body;
-            }
-            catch (Exception ex)
-            {
-                result = correo;
-            }
-
             return result;
         }
 
         public string MandarCorreo(string asunto, string destinatario, string cuerpo)
         {
 
-            destinatario = "desarrollo@grupoapa.com.mx";
-            
-
             string result = string.Empty;
             try
             {
-                MailMessage mail = new MailMessage();
-                var smtp = new SmtpClient();
-                mail.From = new MailAddress("pruebasmail@socasesores.com");
-                mail.IsBodyHtml = true;
-                mail.Subject = asunto;
-                mail.Body = cuerpo;
-                mail.To.Add(destinatario);
-
-
-                mail.CC.Add("brchavez@socasesores.com.mx");
-                mail.CC.Add("jochavez@socasesores.com");
-
-
-                var credentials = new NetworkCredential("sisec@sisec.mx", "XadKnN6bQqfyc1O4");
-                smtp.Credentials = credentials;
-                smtp.Port = 587;
-                smtp.EnableSsl = false;
-                smtp.Host = "smtp-relay.sendinblue.com";
-                smtp.Send(mail);
+                //aqui puede ir su logica para mandar correos
 
                 result = Constantes.RESPUESTA_OK;
             }
@@ -424,9 +85,6 @@ namespace API.Auxiliares
 
             return result;
         }
-
-
-
 
 
         const string correo =

@@ -6,6 +6,7 @@ namespace API.Auxiliares
     public class CatalogAUX: ICatalogAUX
     {
         private readonly IEmpleadosServicio _empleadosServicio;
+
         public CatalogAUX(IEmpleadosServicio empleadosServicio)
         {
             this._empleadosServicio = empleadosServicio;

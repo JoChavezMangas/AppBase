@@ -96,6 +96,10 @@ builder.Services.AddDbContext<ApiConectaContext>(options =>
 builder.Services.AddScoped<IEmpleadosServicio, EmpleadosServicio>();
 builder.Services.AddScoped<IHistorialEmpleadoServicio, HistorialEmpleadoServicio>();
 builder.Services.AddScoped<ILogApiServicio, LogApiServicio>();
+builder.Services.AddScoped<IBancoServicio, BancoServicio>();
+builder.Services.AddScoped<ICatalogosServicio, CatalogosServicio>();
+builder.Services.AddScoped<IBrokersServicio, IBrokersServicio>();
+builder.Services.AddScoped<IPedidosServicio, PedidosServicio>();
 
 //AUXILIARES
 builder.Services.AddScoped<ICatalogAUX, CatalogAUX>();

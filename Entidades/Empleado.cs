@@ -22,16 +22,7 @@ namespace Entidades
         public string? Sexo { get; set; }
         public string? CorreoPersonal { get; set; }
         public string? CorreoEmpresarial { get; set; }
-        public decimal SueldoDiario { get; set; }
-        public decimal SueldoDiarioIntegrado { get; set; }
-        public decimal BonoTrimestral { get; set; }
-        public int PuestoId { get; set; }
-        //public Puesto Puesto { get; set; }
-        public string? Sistemas { get; set; }
+        
 
-
-
-
-        //public ICollection<DatoBancarios> DatosBancarios { get; set; }
     }
 }

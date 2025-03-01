@@ -43,6 +43,12 @@ namespace Data
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<HistorialEmpleado> HistorialEmpleado { get; set; }
         public DbSet<LogApi> LogApi { get; set; }
+        public DbSet<Banco> Banco { get; set; }
+        public DbSet<Catalogos> Catalogos { get; set; }
+        public DbSet<Brokers> Brokers { get; set; }
+        public DbSet<Pedidos> Pedidos { get; set; }
+
+
         #endregion
 
 
