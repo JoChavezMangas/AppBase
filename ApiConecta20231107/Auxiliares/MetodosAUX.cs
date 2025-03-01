@@ -1,6 +1,6 @@
 ﻿using API.DTOs;
 using API.DTOs.OtrosSistemas;
-using ApiConecta20231107.DTOs.OtrosSistemas;
+using ApiBase.DTOs.OtrosSistemas;
 using Data;
 using Entidades;
 using IdentityModel.Client;

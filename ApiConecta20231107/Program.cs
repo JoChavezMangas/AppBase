@@ -1,12 +1,11 @@
 using API.Auxiliares;
 using API.Servicios;
 using API.Validador;
-using ApiConecta20231107.Auxiliares;
+using ApiBase.Auxiliares;
 using Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -118,11 +117,11 @@ builder.Services.AddScoped<IContextoPeticion, ContextoPeticion>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
 
 app.UseExceptionHandler("/api/Cuentas/error");
 

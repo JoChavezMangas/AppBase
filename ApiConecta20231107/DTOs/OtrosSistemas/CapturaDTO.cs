@@ -2,7 +2,7 @@
 using API.DTOs;
 using API.DTOs.OtrosSistemas;
 
-namespace ApiConecta20231107.DTOs.OtrosSistemas
+namespace ApiBase.DTOs.OtrosSistemas
 {
     public class CapturaDTO : GeneralDTO
     {

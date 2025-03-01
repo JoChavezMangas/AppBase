@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "ApiConecta20231107": {
+    "ApiBase": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

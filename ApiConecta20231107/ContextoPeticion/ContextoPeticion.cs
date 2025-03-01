@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace ApiConecta20231107.Auxiliares
+namespace ApiBase.Auxiliares
 {
     public class ContextoPeticion: IContextoPeticion
     {

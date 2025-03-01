@@ -49,25 +49,14 @@ namespace API.Controllers
         }
 
 
-        [HttpGet("hash/{textoPlano}")]
-        public ActionResult RealizarHash(string textoPlano)
-        {
 
-            var resultado1 = hashService.Hash(textoPlano); 
-            var resultado2= hashService.Hash(textoPlano);
-
-            return Ok(new
-            {
-                textoPlano = textoPlano,
-                Hash1 = resultado1,
-                Hash2 = resultado2
-            });
-        }
-
-
+        /// <summary>
+        /// Metodo para comprobar si el servicio esta activo
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("Cifrar")]
         public ActionResult Cifrar() {
-            var textoplano = "oscar cantero";
+            var textoplano = DateTime.Today.ToString();
             var textocifrado=dataProtector.Protect(textoplano);
             var textodescifrado = dataProtector.Unprotect(textocifrado);
 
@@ -79,24 +68,7 @@ namespace API.Controllers
             });
         }
 
-        [HttpGet("CifrarPorTiempo")]
-        public ActionResult CifrarPorTiempo()
-        {
 
-            var protectorLimitadoPorTiempo = dataProtector.ToTimeLimitedDataProtector();
-
-            var textoplano = "oscar cantero";
-            var textocifrado = protectorLimitadoPorTiempo.Protect(textoplano,lifetime:TimeSpan.FromSeconds(5));
-            Thread.Sleep(6000);
-            var textodescifrado = protectorLimitadoPorTiempo.Unprotect(textocifrado);
-
-            return Ok(new
-            {
-                textoplano = textoplano,
-                textocifrado = textocifrado,
-                textodescifrado = textodescifrado
-            });
-        }
         [HttpPost("registrar")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")]
         public async Task<ActionResult<RespuestaAutenticacion>> Registrar(CredencialesUsuario credencialesUsuario)
@@ -112,11 +84,32 @@ namespace API.Controllers
             {
                 return BadRequest(resultado.Errors);
             }
-
         }
 
-        [HttpPost("login")]
+        [HttpPost("ResultadoRapidoLogin")]
+        public async Task<ActionResult<string>> ResultadoRapidoLogin(CredencialesUsuario credencialesUsuario)
+        {
 
+            //return Constantes.RESPUESTA_OK;
+
+            var usuarioMail = await userManager.FindByEmailAsync(credencialesUsuario.Email);
+            var usuarioUser = await userManager.FindByNameAsync(credencialesUsuario.Email);
+
+            var user = usuarioMail ?? usuarioUser;
+
+            if (user == null)
+                return Constantes.RESPUESTA_ERROR;
+
+            var resultado = await signInManager.PasswordSignInAsync(user.UserName, credencialesUsuario.Password, isPersistent: false, lockoutOnFailure: false);
+
+            if (resultado.Succeeded)
+                return Constantes.RESPUESTA_OK;
+            else
+                return Constantes.RESPUESTA_ERROR;
+        }
+
+
+        [HttpPost("login")]
         public async Task<ActionResult<RespuestaAutenticacion>> Login(CredencialesUsuario credencialesUsuario)
         {
             try
@@ -209,7 +202,7 @@ namespace API.Controllers
             claims.AddRange(claimsDB);
             var llave = keyPlease; //new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]));
             var cred = new SigningCredentials(llave, SecurityAlgorithms.HmacSha512);
-            var expiracion = DateTime.UtcNow.AddMinutes(35);
+            var expiracion = DateTime.UtcNow.AddHours(6);
             var securityToken = new JwtSecurityToken(issuer: null, audience: null, claims: claims, expires: expiracion, signingCredentials: cred);
 
             return new RespuestaAutenticacion()
@@ -219,24 +212,6 @@ namespace API.Controllers
                 EmpleadoId = usuario.Id,
                 RolId = Roles.First()
             };
-        }
-        [HttpPost("HacerAdmin")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Policy = "EsAdmin")]
-        public async Task<ActionResult> HacerAdmin(EditarAdminDTO editarAdminDTO)
-        {
-            var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
-            await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "1"));
-            return NoContent();
-        
-        }
-
-        [HttpPost("RemoverAdmin")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")]
-        public async Task<ActionResult> RemoverAdmin(EditarAdminDTO editarAdminDTO)
-        {
-            var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
-            await userManager.RemoveClaimAsync(usuario, new Claim("esAdmin", "1"));
-            return NoContent();
         }
 
         [HttpGet("PasswordOlvidado")]
@@ -291,29 +266,6 @@ namespace API.Controllers
         }
 
 
-        [HttpGet]
-        public IActionResult Get()
-        {
-            if (HttpContext.Request.Headers.TryGetValue("Origin", out var origin))
-            {
-                if (HttpContext.Request.HttpContext.Response.Headers.TryGetValue("Access-Control-Allow-Origin", out var allowOrigin))
-                {
-                    // CORS está habilitado y la solicitud tiene acceso permitido desde el dominio especificado
-                    // Puedes utilizar el valor de allowOrigin para tomar decisiones basadas en el dominio permitido
-                    return Ok("Solicitud permitida por CORS");
-                }
-                else
-                {
-                    // CORS está habilitado pero la solicitud no tiene acceso permitido desde el dominio
-                    return BadRequest("Solicitud denegada por CORS");
-                }
-            }
-            else
-            {
-                // La solicitud no es una solicitud CORS
-                return Ok("No es una solicitud CORS");
-            }
-        }
 
         [Route("error")]
         public IActionResult HandleErrorDevelopment([FromServices] IHostEnvironment hostEnvironment)
@@ -338,7 +290,6 @@ namespace API.Controllers
             {
                 return NotFound();
             }
-
 
             return Problem(
                 detail: exceptionHandlerFeature.Error.StackTrace,

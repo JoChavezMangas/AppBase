@@ -1,4 +1,4 @@
-﻿namespace ApiConecta20231107.Auxiliares
+﻿namespace ApiBase.Auxiliares
 {
     public interface IContextoPeticion
     {
