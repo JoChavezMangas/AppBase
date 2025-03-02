@@ -228,25 +228,6 @@ namespace ApiBase.Controllers
 
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [HttpGet("ColocacionEstados")]
         public async Task<ActionResult<List<ReporteColocacionEstadoDTO>>> ColocacionEstados(string? filterValue0, string? operatorValue0, string? columnField0, string genericParam)
         {
@@ -320,6 +301,163 @@ namespace ApiBase.Controllers
             return resultados;
         }
 
+
+
+
+
+
+
+
+
+
+
+
+        [HttpGet("CrecimientoOperaciones")]
+        public async Task<ActionResult<List<CrecimientoOperacionesDTO>>> CrecimientoOperaciones(string? filterValue0, string? operatorValue0, string? columnField0, string genericParam)
+        {
+            var parametrosArray = genericParam.Split('#');
+
+            var catalogos = _catalogosServicio.ObtenerConsulta().Where(z => z.Tipo == "Año").ToList();
+
+
+
+            var anio = parametrosArray[1] == "" ? "" : catalogos.Where(z => z.Id.ToString() == parametrosArray[1]).FirstOrDefault().Valor;
+            var mes = parametrosArray[2];
+            var broker = parametrosArray[3];
+            var ejecutivo = parametrosArray[4];
+            var estado = parametrosArray[5];
+
+
+
+
+            var queryBase = _pedidosServicio.ObtenerConsulta()
+                .Where(p => p.FechaCreacion.HasValue)
+                .Where(z => (anio == "" || z.FechaCreacion.Value.Year.ToString() == anio) &&
+                            (mes == "" || z.FechaCreacion.Value.Month.ToString() == mes) &&
+                            (broker == "" || z.Broker.ToString() == broker) &&
+                            (estado == "" || z.Estado.ToString() == estado))
+                .ToList(); // Convertir a lista para evitar múltiples consultas
+
+
+
+
+
+
+            // Definir las metas por año
+            var metasPorAnio = new Dictionary<int, int>
+                                {
+                                    { 2020, 15 },
+                                    { 2021, 17 },
+                                    { 2022, 19 },
+                                    { 2023, 21 },
+                                    { 2024, 23 },
+                                    { 2025, 25 }
+                                };
+
+            var operacionesPorAnio = queryBase
+                .Where(p => p.FechaCreacion.HasValue)
+                .GroupBy(p => p.FechaCreacion.Value.Year)
+                .Select(g => new CrecimientoOperacionesDTO
+                {
+                    id = g.Key,
+                    anio = g.Key,
+                    operaciones = g.Count(),
+                    crecimineto = metasPorAnio.ContainsKey(g.Key)
+                        ? ((double)g.Count() / metasPorAnio[g.Key]) * 100  // Operaciones alcanzadas en relación con la meta
+                        : 0 // Si el año no tiene meta, crecimiento es 0
+                })
+                .OrderBy(o => o.anio)
+                .ToList();
+
+            var listaCrecimiento = operacionesPorAnio.Select((o, index) => new CrecimientoOperacionesDTO
+                                                    {
+                                                        id = o.id,
+                                                        anio = o.anio,
+                                                        operaciones = o.operaciones,
+                                                        crecimineto = index == 0 ? 0 :
+                                                                      ((double)(o.operaciones - operacionesPorAnio[index - 1].operaciones) /
+                                                                      operacionesPorAnio[index - 1].operaciones) * 100
+                                                    })
+                                                    .ToList();
+
+            return listaCrecimiento;
+
+        }
+
+
+
+
+
+        [HttpGet("CrecimientoFirmado")]
+        public async Task<ActionResult<List<CrecimientoOperacionesDTO>>> CrecimientoFirmado(string? filterValue0, string? operatorValue0, string? columnField0, string genericParam)
+        {
+            var parametrosArray = genericParam.Split('#');
+
+            var catalogos = _catalogosServicio.ObtenerConsulta().Where(z => z.Tipo == "Año").ToList();
+
+
+
+            var anio = parametrosArray[1] == "" ? "" : catalogos.Where(z => z.Id.ToString() == parametrosArray[1]).FirstOrDefault().Valor;
+            var mes = parametrosArray[2];
+            var broker = parametrosArray[3];
+            var ejecutivo = parametrosArray[4];
+            var estado = parametrosArray[5];
+
+
+
+
+            var queryBase = _pedidosServicio.ObtenerConsulta()
+                .Where(p => p.FechaCreacion.HasValue)
+                .Where(z => (anio == "" || z.FechaCreacion.Value.Year.ToString() == anio) &&
+                            (mes == "" || z.FechaCreacion.Value.Month.ToString() == mes) &&
+                            (broker == "" || z.Broker.ToString() == broker) &&
+                            (estado == "" || z.Estado.ToString() == estado))
+                .ToList(); // Convertir a lista para evitar múltiples consultas
+
+
+
+
+
+
+            // Definir las metas por año
+            var metasPorAnio = new Dictionary<int, int>
+                                {
+                                    { 2020, 15 },
+                                    { 2021, 17 },
+                                    { 2022, 19 },
+                                    { 2023, 21 },
+                                    { 2024, 23 },
+                                    { 2025, 25 }
+                                };
+
+            var operacionesPorAnio = queryBase
+                .Where(p => p.FechaCreacion.HasValue)
+                .GroupBy(p => p.FechaCreacion.Value.Year)
+                .Select(g => new CrecimientoOperacionesDTO
+                {
+                    id = g.Key,
+                    anio = g.Key,
+                    operaciones = g.Count(),
+                    crecimineto = metasPorAnio.ContainsKey(g.Key)
+                        ? ((double)g.Count() / metasPorAnio[g.Key]) * 100  // Operaciones alcanzadas en relación con la meta
+                        : 0 // Si el año no tiene meta, crecimiento es 0
+                })
+                .OrderBy(o => o.anio)
+                .ToList();
+
+            var listaCrecimiento = operacionesPorAnio.Select((o, index) => new CrecimientoOperacionesDTO
+            {
+                id = o.id,
+                anio = o.anio,
+                operaciones = o.operaciones,
+                crecimineto = index == 0 ? 0 :
+            ((double)(o.operaciones - operacionesPorAnio[index - 1].operaciones) /
+            operacionesPorAnio[index - 1].operaciones) * 100
+            }).ToList();
+
+            return listaCrecimiento;
+
+        }
 
 
 
