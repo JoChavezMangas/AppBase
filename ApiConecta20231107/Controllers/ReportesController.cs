@@ -248,7 +248,7 @@ namespace ApiBase.Controllers
 
 
         [HttpGet("ColocacionEstados")]
-        public async Task<ActionResult<List<ReporteColocacionBancoDTO>>> ColocacionEstados(string? filterValue0, string? operatorValue0, string? columnField0, string genericParam)
+        public async Task<ActionResult<List<ReporteColocacionEstadoDTO>>> ColocacionEstados(string? filterValue0, string? operatorValue0, string? columnField0, string genericParam)
         {
             var parametrosArray = genericParam.Split('#');
 
@@ -283,11 +283,11 @@ namespace ApiBase.Controllers
 
             // Agrupar por año y banco, y calcular el porcentaje
             var datosAgrupados = queryBase
-                .GroupBy(p => new { p.FechaCreacion.Value.Year, p.Banco })
+                .GroupBy(p => new { p.FechaCreacion.Value.Year, p.Estado })
                 .Select(g => new
                 {
                     anio = g.Key.Year,
-                    banco = g.Key.Banco,
+                    Estado = g.Key.Estado,
                     monto = g.Sum(z => z.Monto),
                     porcentaje = totalPorAnio.ContainsKey(g.Key.Year) && totalPorAnio[g.Key.Year] > 0
                         ? (double)(g.Sum(z => z.Monto) / totalPorAnio[g.Key.Year]) * 100
@@ -296,15 +296,15 @@ namespace ApiBase.Controllers
                 .ToList();
 
 
-            var bancos = _bancoServicio.ObtenerConsulta().ToList();
+            var estados = _catalogosServicio.ObtenerConsulta().Where(z => z.Tipo == "Estado");
 
             // Generar la lista final en el formato del DTO
             var resultados = datosAgrupados
-                .GroupBy(d => d.banco)
-                .Select(g => new ReporteColocacionBancoDTO
+                .GroupBy(d => d.Estado)
+                .Select(g => new ReporteColocacionEstadoDTO
                 {
                     id = Guid.NewGuid().ToString(),
-                    banco = bancos.FirstOrDefault(z => z.Id == g.Key)?.Nombre ?? "Desconocido",
+                    estado = estados.FirstOrDefault(z => z.Id == g.Key)?.Nombre ?? "Desconocido",
                     a2025 = g.FirstOrDefault(x => x.anio == 2025)?.porcentaje.ToString("F2") ?? "0.00",
                     a2024 = g.FirstOrDefault(x => x.anio == 2024)?.porcentaje.ToString("F2") ?? "0.00",
                     a2023 = g.FirstOrDefault(x => x.anio == 2023)?.porcentaje.ToString("F2") ?? "0.00",
