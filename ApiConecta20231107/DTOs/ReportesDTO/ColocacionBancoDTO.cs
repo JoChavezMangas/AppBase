@@ -4,7 +4,7 @@
     {
         public int banco { get; set; }
         public int anio { get; set; }
-        public double monto { get; set; }
+        public double porcentage { get; set; }
         public int operaciones { get; set; }
         public double total { get; set; }
     }

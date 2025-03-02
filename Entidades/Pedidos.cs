@@ -17,5 +17,6 @@ namespace Entidades
         public decimal Monto { get; set; }
         public Guid Agente { get; set; }
         public DateTime? FechaCreacion { get; set; }
+        public int Banco { get; set; }
     }
 }

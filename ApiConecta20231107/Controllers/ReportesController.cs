@@ -152,18 +152,8 @@ namespace ApiBase.Controllers
 
         }
 
-
-
-
-
-
-
-
-
-
-
         [HttpGet("ColocacionBancos")]
-        public async Task<ActionResult<List<ReporteColocacionMensulaDTO>>> ColocacionBancos(string? filterValue0, string? operatorValue0, string? columnField0, string genericParam)
+        public async Task<ActionResult<List<ReporteColocacionBancoDTO>>> ColocacionBancos(string? filterValue0, string? operatorValue0, string? columnField0, string genericParam)
         {
             var parametrosArray = genericParam.Split('#');
 
@@ -180,50 +170,162 @@ namespace ApiBase.Controllers
 
 
 
-
-            var query = _pedidosServicio.ObtenerConsulta()
-                 .Where(p => p.FechaCreacion.HasValue)
-                 .Where(z => (anio == "" || z.FechaCreacion.Value.Year.ToString() == anio) &&
+            var queryBase = _pedidosServicio.ObtenerConsulta()
+                .Where(p => p.FechaCreacion.HasValue)
+                .Where(z => (anio == "" || z.FechaCreacion.Value.Year.ToString() == anio) &&
                             (mes == "" || z.FechaCreacion.Value.Month.ToString() == mes) &&
                             (broker == "" || z.Broker.ToString() == broker) &&
                             (estado == "" || z.Estado.ToString() == estado))
-                 .GroupBy(p => new { p.FechaCreacion.Value.Year, p.FechaCreacion.Value.Month })
-                 .Select(g => new ColocacionBancoDTO
-                 {
-                     anio = g.Key.Year,
-                     banco = g.Key.Month,
-                     operaciones = g.Count()
-                 })
-                 .ToList();
+                .ToList(); // Convertir a lista para evitar múltiples consultas
 
-            // Lista de meses en español
-            var meses = new Dictionary<int, string>
-            {
-                { 1, "Enero" }, { 2, "Febrero" }, { 3, "Marzo" }, { 4, "Abril" },
-                { 5, "Mayo" }, { 6, "Junio" }, { 7, "Julio" }, { 8, "Agosto" },
-                { 9, "Septiembre" }, { 10, "Octubre" }, { 11, "Noviembre" }, { 12, "Diciembre" }
-            };
+            // Obtener la suma total de montos por año
+            var totalPorAnio = queryBase
+                .GroupBy(p => p.FechaCreacion.Value.Year)
+                .ToDictionary(g => g.Key, g => g.Sum(p => p.Monto));
 
-            // Obtener lista de años desde los datos
-            var anios = query.Select(q => q.anio).Distinct().OrderByDescending(a => a).ToList();
+            // Obtener la suma total de montos de todos los años
+            var totalGlobal = totalPorAnio.Values.Sum();
 
-            var resultados = meses.Select(m => new ReporteColocacionMensulaDTO
-            {
-                id = Guid.NewGuid().ToString(),
-                mes = m.Value,
-                a2025 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2025)?.operaciones.ToString() ?? "0",
-                a2024 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2024)?.operaciones.ToString() ?? "0",
-                a2023 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2023)?.operaciones.ToString() ?? "0",
-                a2022 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2022)?.operaciones.ToString() ?? "0",
-                a2021 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2021)?.operaciones.ToString() ?? "0",
-                a2020 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2020)?.operaciones.ToString() ?? "0",
-                total = query.Where(q => q.mes == m.Key).Sum(q => q.operaciones).ToString()
-            }).ToList();
+            // Agrupar por año y banco, y calcular el porcentaje
+            var datosAgrupados = queryBase
+                .GroupBy(p => new { p.FechaCreacion.Value.Year, p.Banco })
+                .Select(g => new
+                {
+                    anio = g.Key.Year,
+                    banco = g.Key.Banco,
+                    monto = g.Sum(z => z.Monto),
+                    porcentaje = totalPorAnio.ContainsKey(g.Key.Year) && totalPorAnio[g.Key.Year] > 0
+                        ? (double)(g.Sum(z => z.Monto) / totalPorAnio[g.Key.Year]) * 100
+                        : 0.0
+                })
+                .ToList();
+
+
+            var bancos = _bancoServicio.ObtenerConsulta().ToList();
+
+            // Generar la lista final en el formato del DTO
+            var resultados = datosAgrupados
+                .GroupBy(d => d.banco)
+                .Select(g => new ReporteColocacionBancoDTO
+                {
+                    id = Guid.NewGuid().ToString(),
+                    banco = bancos.FirstOrDefault(z => z.Id == g.Key)?.Nombre ?? "Desconocido",
+                    a2025 = g.FirstOrDefault(x => x.anio == 2025)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2024 = g.FirstOrDefault(x => x.anio == 2024)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2023 = g.FirstOrDefault(x => x.anio == 2023)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2022 = g.FirstOrDefault(x => x.anio == 2022)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2021 = g.FirstOrDefault(x => x.anio == 2021)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2020 = g.FirstOrDefault(x => x.anio == 2020)?.porcentaje.ToString("F2") ?? "0.00",
+                    total = totalGlobal > 0
+                        ? (g.Sum(x => x.monto) / totalGlobal * 100).ToString("F2") // Suma total del banco sobre la suma global
+                        : "0.00"
+                })
+                .ToList();
 
             return resultados;
 
 
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpGet("ColocacionEstados")]
+        public async Task<ActionResult<List<ReporteColocacionBancoDTO>>> ColocacionEstados(string? filterValue0, string? operatorValue0, string? columnField0, string genericParam)
+        {
+            var parametrosArray = genericParam.Split('#');
+
+            var catalogos = _catalogosServicio.ObtenerConsulta().Where(z => z.Tipo == "Año").ToList();
+
+
+
+            var anio = parametrosArray[1] == "" ? "" : catalogos.Where(z => z.Id.ToString() == parametrosArray[1]).FirstOrDefault().Valor;
+            var mes = parametrosArray[2];
+            var broker = parametrosArray[3];
+            var ejecutivo = parametrosArray[4];
+            var estado = parametrosArray[5];
+
+
+
+
+            var queryBase = _pedidosServicio.ObtenerConsulta()
+                .Where(p => p.FechaCreacion.HasValue)
+                .Where(z => (anio == "" || z.FechaCreacion.Value.Year.ToString() == anio) &&
+                            (mes == "" || z.FechaCreacion.Value.Month.ToString() == mes) &&
+                            (broker == "" || z.Broker.ToString() == broker) &&
+                            (estado == "" || z.Estado.ToString() == estado))
+                .ToList(); // Convertir a lista para evitar múltiples consultas
+
+            // Obtener la suma total de montos por año
+            var totalPorAnio = queryBase
+                .GroupBy(p => p.FechaCreacion.Value.Year)
+                .ToDictionary(g => g.Key, g => g.Sum(p => p.Monto));
+
+            // Obtener la suma total de montos de todos los años
+            var totalGlobal = totalPorAnio.Values.Sum();
+
+            // Agrupar por año y banco, y calcular el porcentaje
+            var datosAgrupados = queryBase
+                .GroupBy(p => new { p.FechaCreacion.Value.Year, p.Banco })
+                .Select(g => new
+                {
+                    anio = g.Key.Year,
+                    banco = g.Key.Banco,
+                    monto = g.Sum(z => z.Monto),
+                    porcentaje = totalPorAnio.ContainsKey(g.Key.Year) && totalPorAnio[g.Key.Year] > 0
+                        ? (double)(g.Sum(z => z.Monto) / totalPorAnio[g.Key.Year]) * 100
+                        : 0.0
+                })
+                .ToList();
+
+
+            var bancos = _bancoServicio.ObtenerConsulta().ToList();
+
+            // Generar la lista final en el formato del DTO
+            var resultados = datosAgrupados
+                .GroupBy(d => d.banco)
+                .Select(g => new ReporteColocacionBancoDTO
+                {
+                    id = Guid.NewGuid().ToString(),
+                    banco = bancos.FirstOrDefault(z => z.Id == g.Key)?.Nombre ?? "Desconocido",
+                    a2025 = g.FirstOrDefault(x => x.anio == 2025)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2024 = g.FirstOrDefault(x => x.anio == 2024)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2023 = g.FirstOrDefault(x => x.anio == 2023)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2022 = g.FirstOrDefault(x => x.anio == 2022)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2021 = g.FirstOrDefault(x => x.anio == 2021)?.porcentaje.ToString("F2") ?? "0.00",
+                    a2020 = g.FirstOrDefault(x => x.anio == 2020)?.porcentaje.ToString("F2") ?? "0.00",
+                    total = totalGlobal > 0
+                        ? (g.Sum(x => x.monto) / totalGlobal * 100).ToString("F2") // Suma total del banco sobre la suma global
+                        : "0.00"
+                })
+                .ToList();
+
+            return resultados;
+        }
+
+
+
+
+
+
+
 
 
 
