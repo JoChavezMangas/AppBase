@@ -18,5 +18,6 @@ namespace Entidades
         public Guid Agente { get; set; }
         public DateTime? FechaCreacion { get; set; }
         public int Banco { get; set; }
+        public string Tipo { get; set; }
     }
 }

@@ -50,7 +50,7 @@ namespace ApiBase.Controllers
             try
             {
                 _pedidosServicio.Crear(pedidoDTO.PedidoParaBase(), _contextoPeticion.empleadoId);
-
+                result = Constantes.RESPUESTA_OK;
             }
             catch (Exception ex)
             {

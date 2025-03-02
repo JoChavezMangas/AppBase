@@ -10,6 +10,7 @@ namespace ApiBase.DTOs
         public DateTime? fecha { get; set; }
         public string empleado { get; set; }
         public string monto { get; set; }
+        public string tipo { get; set; }
 
         public Pedidos PedidoParaBase()
         {
@@ -20,6 +21,8 @@ namespace ApiBase.DTOs
             pedido.Broker = int.Parse( this.brokers);
             pedido.IdExterno = Guid.NewGuid();
             pedido.Estado = int.Parse(estado);
+            pedido.Tipo = tipo;
+            pedido.Banco = int.Parse(banco);
             return pedido;
         }
     }
