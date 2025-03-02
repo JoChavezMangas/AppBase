@@ -13,7 +13,7 @@ namespace ApiBase.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrador")]
     public class PedidosController : Controller
     {
         private readonly IEmpleadosServicio _empleadosServicio;

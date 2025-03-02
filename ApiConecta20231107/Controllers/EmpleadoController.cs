@@ -78,11 +78,20 @@ namespace API.Controllers
 
                 var empresaActual = _httpContextAccessor.HttpContext.User.Claims;
 
-                EmpleadoDTO result = new EmpleadoDTO()
+                var emplado = _empleadosServicio.ObtenerConsulta().FirstOrDefault(z => z.Id == Id);
+
+                EmpleadoDTO result = new EmpleadoDTO();
+
+                if (emplado == null)
                 {
-                    Nombre ="Silvia",
-                    ApellidoPaterno= "Ramirez"
-                };
+                    result.Nombre = "Invitado";
+                    result.ApellidoPaterno = "";
+                }
+                else
+                {
+                    result.Nombre = emplado.Nombre;
+                    result.ApellidoPaterno = emplado.ApellidoPaterno;
+                }
 
                 var user = _userManager.Users.Where(z => z.Id == result.Id.ToString());
                 if (user.Any())

@@ -79,13 +79,13 @@ namespace ApiBase.Controllers
             {
                 id = Guid.NewGuid().ToString(),
                 mes = m.Value,
-                a2025 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2025)?.monto.ToString("F2") ?? "0.00",
-                a2024 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2024)?.monto.ToString("F2") ?? "0.00",
-                a2023 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2023)?.monto.ToString("F2") ?? "0.00",
-                a2022 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2022)?.monto.ToString("F2") ?? "0.00",
-                a2021 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2021)?.monto.ToString("F2") ?? "0.00",
-                a2020 = query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2020)?.monto.ToString("F2") ?? "0.00",
-                total = query.Where(q => q.mes == m.Key).Sum(q => q.monto).ToString("F2")
+                a2025 =   query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2025)?.monto.ToString("F2") ?? "0.00",
+                a2024 =   query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2024)?.monto.ToString("F2") ?? "0.00",
+                a2023 =   query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2023)?.monto.ToString("F2") ?? "0.00",
+                a2022 =   query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2022)?.monto.ToString("F2") ?? "0.00",
+                a2021 =   query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2021)?.monto.ToString("F2") ?? "0.00",
+                a2020 =   query.FirstOrDefault(q => q.mes == m.Key && q.anio == 2020)?.monto.ToString("F2") ?? "0.00",
+                total =   query.Where(q => q.mes == m.Key).Sum(q => q.monto).ToString("F2")
             }).ToList();
 
             return resultados;
@@ -211,15 +211,15 @@ namespace ApiBase.Controllers
                 {
                     id = Guid.NewGuid().ToString(),
                     banco = bancos.FirstOrDefault(z => z.Id == g.Key)?.Nombre ?? "Desconocido",
-                    a2025 = g.FirstOrDefault(x => x.anio == 2025)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2024 = g.FirstOrDefault(x => x.anio == 2024)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2023 = g.FirstOrDefault(x => x.anio == 2023)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2022 = g.FirstOrDefault(x => x.anio == 2022)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2021 = g.FirstOrDefault(x => x.anio == 2021)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2020 = g.FirstOrDefault(x => x.anio == 2020)?.porcentaje.ToString("F2") ?? "0.00",
-                    total = totalGlobal > 0
+                    a2025 = (g.FirstOrDefault(x => x.anio == 2025)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2024 = (g.FirstOrDefault(x => x.anio == 2024)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2023 = (g.FirstOrDefault(x => x.anio == 2023)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2022 = (g.FirstOrDefault(x => x.anio == 2022)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2021 = (g.FirstOrDefault(x => x.anio == 2021)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2020 = (g.FirstOrDefault(x => x.anio == 2020)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    total = (totalGlobal > 0
                         ? (g.Sum(x => x.monto) / totalGlobal * 100).ToString("F2") // Suma total del banco sobre la suma global
-                        : "0.00"
+                        : "0.00")  
                 })
                 .ToList();
 
@@ -287,15 +287,15 @@ namespace ApiBase.Controllers
                 {
                     id = Guid.NewGuid().ToString(),
                     estado = estados.FirstOrDefault(z => z.Id == g.Key)?.Nombre ?? "Desconocido",
-                    a2025 = g.FirstOrDefault(x => x.anio == 2025)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2024 = g.FirstOrDefault(x => x.anio == 2024)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2023 = g.FirstOrDefault(x => x.anio == 2023)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2022 = g.FirstOrDefault(x => x.anio == 2022)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2021 = g.FirstOrDefault(x => x.anio == 2021)?.porcentaje.ToString("F2") ?? "0.00",
-                    a2020 = g.FirstOrDefault(x => x.anio == 2020)?.porcentaje.ToString("F2") ?? "0.00",
-                    total = totalGlobal > 0
+                    a2025 = (g.FirstOrDefault(x => x.anio == 2025)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2024 = (g.FirstOrDefault(x => x.anio == 2024)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2023 = (g.FirstOrDefault(x => x.anio == 2023)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2022 = (g.FirstOrDefault(x => x.anio == 2022)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2021 = (g.FirstOrDefault(x => x.anio == 2021)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    a2020 = (g.FirstOrDefault(x => x.anio == 2020)?.porcentaje.ToString("F2") ?? "0.00")  ,
+                    total = (totalGlobal > 0
                         ? (g.Sum(x => x.monto) / totalGlobal * 100).ToString("F2") // Suma total del banco sobre la suma global
-                        : "0.00"
+                        : "0.00")
                 })
                 .ToList();
 
@@ -347,7 +347,6 @@ namespace ApiBase.Controllers
                                 };
 
             var operacionesPorAnio = queryBase
-                .Where(p => p.FechaCreacion.HasValue)
                 .GroupBy(p => p.FechaCreacion.Value.Year)
                 .Select(g => new CrecimientoOperacionesDTO
                 {
@@ -355,24 +354,14 @@ namespace ApiBase.Controllers
                     anio = g.Key,
                     operaciones = g.Count(),
                     crecimineto = metasPorAnio.ContainsKey(g.Key)
-                        ? ((double)g.Count() / metasPorAnio[g.Key]) * 100  // Operaciones alcanzadas en relación con la meta
-                        : 0 // Si el año no tiene meta, crecimiento es 0
+                                    ? Math.Round(((double)(g.Count() - metasPorAnio[g.Key]) / metasPorAnio[g.Key]) * 100, 2)
+                                    : 0
                 })
                 .OrderBy(o => o.anio)
                 .ToList();
 
-            var listaCrecimiento = operacionesPorAnio.Select((o, index) => new CrecimientoOperacionesDTO
-                                                    {
-                                                        id = o.id,
-                                                        anio = o.anio,
-                                                        operaciones = o.operaciones,
-                                                        crecimineto = index == 0 ? 0 :
-                                                                      ((double)(o.operaciones - operacionesPorAnio[index - 1].operaciones) /
-                                                                      operacionesPorAnio[index - 1].operaciones) * 100
-                                                    })
-                                                    .ToList();
 
-            return listaCrecimiento;
+            return operacionesPorAnio;
 
         }
 
@@ -475,16 +464,28 @@ namespace ApiBase.Controllers
                                         operacionesHipo = g.Count(p => p.Tipo == "51"),
                                         operacionesPyme = g.Count(p => p.Tipo == "52"),
                                         operacionesAuto = g.Count(p => p.Tipo == "53"),
-                                        operacionesTotal = g.Count(), // Total de operaciones del año
+                                        //operacionesTotal = g.Count(), // Total de operaciones del año
 
                                         // Sumar montos de firma por tipo
                                         firmaHipo = (double)g.Where(p => p.Tipo == "51").Sum(p => p.Monto),
                                         firmaPyme = (double)g.Where(p => p.Tipo == "52").Sum(p => p.Monto),
                                         firmaAuto = (double)g.Where(p => p.Tipo == "53").Sum(p => p.Monto),
-                                        firmaTotal = (double)g.Sum(p => p.Monto) // Total firmado en el año
+                                        //firmaTotal = (double)g.Sum(p => p.Monto) // Total firmado en el año
                                     })
                                     .OrderBy(x => x.anio)
                                     .ToList();
+
+            var resultados2 = from t in queryBase
+                              group t by t.FechaCreacion.Value.Year into box
+                              select new DesgloseColocacionDTO
+                              {
+                                  Id = Guid.NewGuid().ToString(),
+                                  anio = box.Key,
+                                  operacionesHipo = box.Where(z => z.Tipo == "51").Count()
+                              };
+
+            var miau1 = resultados2.ToList();
+
 
 
             return resultados;
@@ -575,7 +576,7 @@ namespace ApiBase.Controllers
                 .Select(g => new ColcoacionEjecutivoDTO
                 {
                     Id = Guid.NewGuid().ToString(),
-                    ejecutivo = empleados.Where(z=>z.BrokerId == g.Key).FirstOrDefault().NombreCompeto, // Método para obtener el nombre del ejecutivo
+                    ejecutivo = empleados.FirstOrDefault(z => z.Id == g.Key)?.NombreCompeto ?? "Desconocido",
 
                     // Contar operaciones por año
                     operaciones2025 = g.Count(p => p.FechaCreacion.Value.Year == 2025),
@@ -632,10 +633,12 @@ namespace ApiBase.Controllers
 
             for (int i = 0; i < 40; i++)
             {
+                var idThisEmployee = brokerIds[random.Next(brokerIds.Length)];
+
                 EmpleadoBrokerDTO empleado = new EmpleadoBrokerDTO
                 {
-                    Id = Guid.NewGuid(),
-                    BrokerId = brokerIds[random.Next(brokerIds.Length)],
+                    Id = idThisEmployee,
+                    BrokerId = idThisEmployee,
                     NombreCompeto = $"Empleado {i + 1}"
                 };
                 listaEmpleados.Add(empleado);
