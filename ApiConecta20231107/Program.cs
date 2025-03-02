@@ -19,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddValidatorsFromAssemblyContaining<EmpresaValidador>();
+//builder.Services.AddValidatorsFromAssemblyContaining<EmpresaValidador>();
 
 
 var keyPlease = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["llavejwt"]));
@@ -98,7 +98,7 @@ builder.Services.AddScoped<IHistorialEmpleadoServicio, HistorialEmpleadoServicio
 builder.Services.AddScoped<ILogApiServicio, LogApiServicio>();
 builder.Services.AddScoped<IBancoServicio, BancoServicio>();
 builder.Services.AddScoped<ICatalogosServicio, CatalogosServicio>();
-builder.Services.AddScoped<IBrokersServicio, IBrokersServicio>();
+builder.Services.AddScoped<IBrokersServicio, BrokersServicio>();
 builder.Services.AddScoped<IPedidosServicio, PedidosServicio>();
 
 //AUXILIARES

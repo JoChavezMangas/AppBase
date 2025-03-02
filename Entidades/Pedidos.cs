@@ -13,7 +13,9 @@ namespace Entidades
         public int Id { get; set; }
         public Guid IdExterno { get; set; }
         public int Broker { get; set; }
+        public int Estado { get; set; }
         public decimal Monto { get; set; }
         public Guid Agente { get; set; }
+        public DateTime? FechaCreacion { get; set; }
     }
 }

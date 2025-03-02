@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data.Entity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ApiBase.Auxiliares;
+using ApiBase.DTOs;
 
 namespace API.Controllers
 {
@@ -211,6 +212,65 @@ namespace API.Controllers
 
 
         #endregion
+
+
+
+
+        //Empleados Externos
+
+
+        [HttpGet("ObetenerComboEmpleados")]
+        public List<ComboDTO> Combos(string filtro)
+        {
+
+            var query = from t in ObtenerEmpleadosBrokers()
+                        where (filtro =="0"|| t.BrokerId.ToString() == filtro)
+                        select new ComboDTO()
+                        {
+                            id = t.Id.ToString(),
+                            Nombre = t.NombreCompeto.ToString()
+                        };
+            return query.ToList();
+        }
+
+
+        public List<EmpleadoBrokerDTO> ObtenerEmpleadosBrokers()
+        {
+            List<EmpleadoBrokerDTO> listaEmpleados = new List<EmpleadoBrokerDTO>();
+            Random random = new Random();
+
+            Guid[] brokerIds = new Guid[]
+            {
+            Guid.Parse("3E6F7E7B-FF3F-4A8A-A9D2-153B792FCD13"),
+            Guid.Parse("52DCC986-E111-44EE-B8CC-848E7CCF2033"),
+            Guid.Parse("AA7D095F-81BF-461D-9E73-0BC991ECB695"),
+            Guid.Parse("B448B4E2-F495-49DE-8118-67121AA39349"),
+            Guid.Parse("26E1CFB9-AB69-4B4C-B3AE-AAFEB9FDB13B"),
+            Guid.Parse("2CDD3B0B-887D-475A-854B-CF240323C79F"),
+            Guid.Parse("94D253A9-51F8-4C98-95CB-8B88A4649CEB"),
+            Guid.Parse("29443E71-5E00-48E7-9AD6-06B3AB45EB62"),
+            Guid.Parse("498E1804-0F4B-45BE-AE32-EC2A21E507F2"),
+            Guid.Parse("4B483132-368F-45FF-B067-17A1C1AC37CF"),
+            Guid.Parse("D7D8CAF2-909B-488B-8B84-0CA69E260C74")
+            };
+
+            for (int i = 0; i < 40; i++)
+            {
+                EmpleadoBrokerDTO empleado = new EmpleadoBrokerDTO
+                {
+                    Id = Guid.NewGuid(),
+                    BrokerId = brokerIds[random.Next(brokerIds.Length)],
+                    NombreCompeto = $"Empleado {i + 1}"
+                };
+                listaEmpleados.Add(empleado);
+            }
+
+
+            return listaEmpleados;
+        }
+
+
+
     }
 }
 

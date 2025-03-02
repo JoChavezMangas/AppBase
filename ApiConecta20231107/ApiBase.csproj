@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <Compile Remove="DTOs\AgenteSOCDTO.cs" />
+    <Compile Remove="DTOs\EmpresaDTO.cs" />
   </ItemGroup>
 
   <ItemGroup>
