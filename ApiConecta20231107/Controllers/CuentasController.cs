@@ -24,7 +24,6 @@ namespace API.Controllers
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<IdentityUser> signInManager;
-        private readonly HashService hashService;
         private readonly IDataProtector dataProtector;
         private readonly IMetodosAUX _metodosAUX;
         private readonly ILogApiServicio _logApiServicio;
@@ -32,17 +31,12 @@ namespace API.Controllers
         public CuentasController(UserManager<IdentityUser> userManager, 
                                  IConfiguration configuration, 
                                  SignInManager<IdentityUser> signInManager, 
-                                 IDataProtectionProvider dataProtectionProvider,
-                                 HashService hashService,
                                  IMetodosAUX metodosAUX,
                                  ILogApiServicio logApiServicio)
-                                 //IEmpleadosServicio empleadosServicio)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
-            this.hashService = hashService;
-            dataProtector = dataProtectionProvider.CreateProtector("CA3MWMYAJdaW4TH61Th95kuVMSU51n9iA");
             this._metodosAUX = metodosAUX;
             this._logApiServicio = logApiServicio;
         }
@@ -67,29 +61,9 @@ namespace API.Controllers
             });
         }
 
-
-        [HttpPost("registrar")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")]
-        public async Task<ActionResult<RespuestaAutenticacion>> Registrar(CredencialesUsuario credencialesUsuario)
-        {
-            var usuario = new IdentityUser { UserName = credencialesUsuario.Email, Email = credencialesUsuario.Email };
-            var resultado = await userManager.CreateAsync(usuario, credencialesUsuario.Password);
-
-            if (resultado.Succeeded)
-            {
-                return await ConstruirToken(credencialesUsuario);
-            }
-            else
-            {
-                return BadRequest(resultado.Errors);
-            }
-        }
-
         [HttpPost("ResultadoRapidoLogin")]
         public async Task<ActionResult<string>> ResultadoRapidoLogin(CredencialesUsuario credencialesUsuario)
         {
-
-            //return Constantes.RESPUESTA_OK;
 
             var usuarioMail = await userManager.FindByEmailAsync(credencialesUsuario.Email);
             var usuarioUser = await userManager.FindByNameAsync(credencialesUsuario.Email);
@@ -136,31 +110,6 @@ namespace API.Controllers
             {
                 return BadRequest("Login Incorrecto*****"+ex.Message);
             }
-           
-
-
-        }
-
-
-        [HttpPost("GetTocken")]
-        public async Task<ActionResult<RespuestaAutenticacion>> GetTocken(CredencialesUsuario credencialesUsuario)
-        {
-            var user = userManager.FindByNameAsync(credencialesUsuario.Email).Result;
-
-            if (user == null)
-                return Ok("Login Incorrecto*****pass");
-
-            var resultado = await signInManager.PasswordSignInAsync(user.UserName, credencialesUsuario.Password, isPersistent: false, lockoutOnFailure: false);
-
-
-            if (resultado.Succeeded)
-            {
-                return await ConstruirToken(credencialesUsuario);
-            }
-            else
-            {
-                return Ok("Login Incorrecto*****pass");
-            }
         }
 
 
@@ -199,7 +148,7 @@ namespace API.Controllers
             var keyPlease = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]));
 
             claims.AddRange(claimsDB);
-            var llave = keyPlease; //new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]));
+            var llave = keyPlease; 
             var cred = new SigningCredentials(llave, SecurityAlgorithms.HmacSha512);
             var expiracion = DateTime.UtcNow.AddHours(6);
             var securityToken = new JwtSecurityToken(issuer: null, audience: null, claims: claims, expires: expiracion, signingCredentials: cred);
@@ -213,56 +162,6 @@ namespace API.Controllers
             };
         }
 
-        [HttpGet("PasswordOlvidado")]
-        public async Task<JsonResult> PasswordOlvidado(string usuario)
-        {
-            var usuarioMail = userManager.FindByEmailAsync(usuario).Result;
-            var usuarioUser = userManager.FindByNameAsync(usuario).Result;
-            var user = usuarioMail ?? usuarioUser;
-
-            if (user == null)
-                return new JsonResult(new { status = "Usuario no encontrado" }); 
-            else
-            {
-                var newPass = user.UserName + DateTime.Now.Ticks.ToString();
-                userManager.RemovePasswordAsync(user);
-                userManager.AddPasswordAsync(user, newPass);
-
-                _metodosAUX.MandarCorreoPass(user.UserName, user.Email, newPass);
-            }
-
-            return new JsonResult(new { status = Constantes.RESPUESTA_OK });
-        }
-
-        [HttpGet("CambiarPassword")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<JsonResult> CambiarPassword(string usuarioId,string usuarioCorreo ,string actualPass,string newPass)
-        {
-            var usuarioIddBase = userManager.FindByIdAsync(usuarioId).Result;
-            var usuarioCorreoBase = userManager.FindByIdAsync(usuarioCorreo).Result;
-
-            var user = usuarioIddBase ?? usuarioCorreoBase;
-
-            if (usuarioIddBase != usuarioCorreoBase)
-                return new JsonResult(new { status = "Por favor verifica tu correo" });
-
-            if (user == null)
-                return new JsonResult(new { status = "usuario no encontrado" });
-            else
-            {
-                var cambio = userManager.ChangePasswordAsync(user, actualPass, newPass).Result;
-                if (cambio.Succeeded)
-                {
-                    _metodosAUX.MandarCorreoPass(user.UserName, user.Email, newPass);
-                    return new JsonResult(new { status = Constantes.RESPUESTA_OK });
-                }
-                else
-                {
-                    return new JsonResult(new { status = "Por favor verifica tus datos" });
-                }
-
-            }
-        }
 
 
 
